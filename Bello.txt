@@ -1,8 +1,0 @@
-Per aggiungere nuovi files e :
-git add .
-
-Dopo modifica di un file:
-git commit -a -m "Messaggio"
-
-Per sincronizzare:
-git pull upstream master && git push origin master
