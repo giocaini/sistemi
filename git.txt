@@ -6,3 +6,5 @@ git commit -a -m "Messaggio"
 
 Per sincronizzare:
 git pull upstream master && git push origin master
+
+oss: quando si rinomina il file bisogna comunque fare una add, anche se il contenuto del file non cambia
