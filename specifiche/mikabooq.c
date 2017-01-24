@@ -27,7 +27,7 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 		if (list_empty(&(pcbFree_h))) return NULL;
 		else if(p_parent->p_parent==NULL) return NULL;
 		else{
-			pcb_t* allocpcb = container_of(pcbFree->next, pcb_t, ?);
+			pcb_t* allocpcb = container_of(pcbFree->next, pcb_t, p_parent->p_siblings);
 			//Stacco l'elemento dalla lista libera
 			list_del(pcbFree->next);
 			//inizializzo i campi del pcb_t che ho allocato
