@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "mikabooq.h"
 struct list_head pcbFree;
-************************************** PROC MGMT ************************/
+/************************************** PROC MGMT ************************/
 
 /* initialize the data structure */
 /* the return value is the address of the root process */
@@ -11,7 +11,8 @@ struct pcb_t *proc_init(void) {
 	INIT_LIST_HEAD(&(pcbFree));
 	pcbFree=&(pcbs[0]);
 	for(i=1; i<MAXPROC; i++){
-		list_add(&(pcbs[i]), &(pcbFree));
+		pcb_t* newPcb = &pcbs[i];
+        	list_add(&(newPcb->p_siblings), &(pcbFree));
 	}
 	pcb_t* root=&(pcbs[0]);
 	INIT_LIST_HEAD(&(root->p_children));
@@ -27,9 +28,9 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 		if (list_empty(&(pcbFree_h))) return NULL;
 		else if(p_parent->p_parent==NULL) return NULL;
 		else{
-			pcb_t* allocpcb = container_of(pcbFree->next, pcb_t, p_parent->p_siblings);
+			pcb_t* allocpcb = container_of(pcbFree.next, pcb_t, p_siblings);
 			//Stacco l'elemento dalla lista libera
-			list_del(pcbFree->next);
+			list_del(pcbFree.next);
 			//inizializzo i campi del pcb_t che ho allocato
 			INIT_LIST_HEAD(&(allocpcb->p_children));
 			INIT_LIST_HEAD(&(allocpcb->p_threads));
