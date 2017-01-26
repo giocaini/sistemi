@@ -25,10 +25,10 @@ return(root);
 /* alloc a new empty pcb (as a child of p_parent) */
 /* p_parent cannot be NULL */
 struct pcb_t *proc_alloc(struct pcb_t *p_parent){
-		if (list_empty(&(pcbFree_h))) return NULL;
-		else if(p_parent->p_parent==NULL) return NULL;
+		if (list_empty(&(pcbFree))) return NULL;
+		else if(p_parent==NULL) return NULL;
 		else{
-			pcb_t* allocpcb = container_of(pcbFree.next, pcb_t, p_siblings);
+			struct pcb_t* allocpcb = container_of(pcbFree.next, pcb_t, p_siblings);
 			//Stacco l'elemento dalla lista libera
 			list_del(pcbFree.next);
 			//inizializzo i campi del pcb_t che ho allocato
@@ -36,22 +36,47 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 			INIT_LIST_HEAD(&(allocpcb->p_threads));
 			allocpcb->p_siblings=p_parent->p_children;
 			//aggiungo l'elemento allocato ai figli del padre
-			list_add(&(allocpcb),&(p_parent->p_children));
+			list_add(&(allocpcb->p_siblings),&(p_parent->p_children));
 			allocpcb->p_parent=p_parent;
-		
+			//aggiungo allocpcb ai suoi fratelli
+			struct pbc_t* item;
+			list_for_each_entry(item, &(allocpcb->p_siblings), p_siblings){
+				// item contiene il puntatore all'elemento corrente
+				list_add(&(allocpcb->p_siblings),&(item->p_siblings))
+			}
+			return(allocpcb);
 		}
+	
 }
 
 /* delete a process (properly updating the process tree links) */
 /* this function must fail if the process has threads or children. */
 /* return value: 0 in case of success, -1 otherwise */
-int proc_delete(struct pcb_t *oldproc);
+int proc_delete(struct pcb_t *oldproc){
+	if(!(list_empty(oldproc->p_children))) return -1;
+	if(!(list_empy(oldproc->p_threads))) return-1;
+	list_del(&(allopcb->p_sibling), &(oldproc->p_sibling));
+	struct pbc_t* item;
+	list_for_each_entry(item, &(allocpcb->p_siblings), p_siblings){
+		// item contiene il puntatore all'elemento corrente
+		list_add(&(allocpcb->p_siblings),&(item->p_siblings))
+	}
+	list_add(&(oldproc->p_sibling),&(pcbFree));
+	 return(0);
+}
 
 /* return the pointer to the first child (NULL if the process has no children) */
-struct pcb_t *proc_firstchild(struct pcb_t *proc);
+struct pcb_t *proc_firstchild(struct pcb_t *proc){
+	if((list_empty(proc->p_children))) return NULL;
+	return container_of((proc->p_children).next, pcb_t, p_sibling);
+	
+}
 
 /* return the pointer to the first thread (NULL if the process has no threads) */
-struct tcb_t *proc_firstthread(struct pcb_t *proc);
+struct tcb_t *proc_firstthread(struct pcb_t *proc){
+	if((list_empty(proc->p_threads))) return NULL;
+	return container_of((proc->p_threads).next, pcb_t, p_sibling);
+}
 
 /****************************************** THREAD ALLOCATION ****************/
 
