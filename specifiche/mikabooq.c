@@ -118,9 +118,9 @@ struct tcb_t *thread_alloc(struct pcb_t *process) {
 	//imposto il processo "padre" in p_tcb
 	allocTcb->t_pcb=process;
 	//inizializzo lo stato del thread
-	allocTcb->t_status=T_STATUS_NONE; //allocato, ma non ancora eseguito
+	//allocTcb->t_status=T_STATUS_NONE; //allocato, ma non ancora eseguito
 	//inizializzo t_wait4sender
-	allocTcb->t_wait4sender=NULL;
+	//allocTcb->t_wait4sender=NULL;
 	//aggiungo gli altri threads del processo padre nella lista t_next
 	allocTcb->t_next=process->p_threads;
 	//aggiungo l'elemento allocato ai thread del processo "padre"
@@ -134,7 +134,7 @@ struct tcb_t *thread_alloc(struct pcb_t *process) {
 }
 
 /* Deallocate a tcb (unregistering it from the list of threads of
-	 its process) */
+	 its process) */ 
 /* it fails if the message queue is not empty (returning -1) */
 int thread_free(struct tcb_t *oldthread){
 	if (!(list_empty(oldthread->t_msgq)) return -1;	

@@ -159,7 +159,7 @@ void thread_enqueue(struct tcb_t *new, struct list_head *queue){
 	 return NULL if the list is empty */
 struct tcb_t *thread_qhead(struct list_head *queue){
 	if (list_empty(queue)) return NULL;
-	return (queue.next);
+	return (conrainer_of(queue.next, tcb_t, t_sched));
 }
 
 /* get the first element of a scheduling queue.
@@ -168,16 +168,8 @@ struct tcb_t *thread_dequeue(struct list_head *queue);
 	if (list_empty(queue)) return NULL;
 	struct list_head *temp_t = queue.next;
 	list_del(queue.next);
-	return (temp_t);
+	return (conrainer_of(temp_t, tcb_t, t_sched));
 }
-
-static inline void thread_outqueue(struct tcb_t *this) {
-	list_del(&this->t_sched);
-}
-
-
-#define for_each_thread_in_q(pos, queue) \
-	list_for_each_entry(pos, queue, t_sched)
 
 /*************************** MSG QUEUE ************************/
 
@@ -231,7 +223,7 @@ int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value)
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		
-		value=temp_m->m_value;
+		*value=temp_m->m_value;
 		return 0;
 	}
 	if ((sender!=NULL)&&(*sender==NULL)){ //CASO 2: No filtro mittente, ma memorizzato
@@ -243,9 +235,9 @@ int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value)
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		
-		value=temp_m->m_value;
+		*value=temp_m->m_value;
 		//Imposto il campo sender
-		sender = temp_m->m_sender;		
+		*sender = temp_m->m_sender;		
 		return 0;
 	}
 	if ((sender!=NULL)&&(*sender!=NULL)){ //CASO 3: Filtro mittente
@@ -264,7 +256,7 @@ int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value)
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		
-		value=temp_m->m_value;
+		*value=temp_m->m_value;
 		return 0;
 	}
 }
