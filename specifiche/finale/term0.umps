@@ -1,0 +1,12 @@
+proc_init done
+thread_init done
+msgq_init done
+proc_alloc: Okay
+proc_delete: Okay
+proc hierarchy: Okay
+thread_alloc: Okay
+thread_delete: Okay
+thread queue: Okay
+message queue: Okay
+That's one small step for a program, one giant leap for an operating system.
+SYSTEM HALTED.
