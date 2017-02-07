@@ -137,7 +137,11 @@ void thread_enqueue(struct tcb_t *new, struct list_head *queue){
 	 return NULL if the list is empty */
 struct tcb_t *thread_qhead(struct list_head *queue){
 	if (list_empty(queue)) return NULL;
+<<<<<<< HEAD
+	return (conrainer_of(queue.next, tcb_t, t_sched));
+=======
 	return (container_of(queue.next, tcb_t, t_sched));
+>>>>>>> 14a2cf44c5e8a86b0edfdcc944366b2daf240392
 }
 
 /* get the first element of a scheduling queue.
@@ -146,10 +150,16 @@ struct tcb_t *thread_dequeue(struct list_head *queue);
 	if (list_empty(queue)) return NULL;
 	struct list_head *temp_t = queue.next;
 	list_del(queue.next);
+<<<<<<< HEAD
+	return (conrainer_of(temp_t, tcb_t, t_sched));
+}
+
+=======
 	return (container_of(temp_t, tcb_t, t_sched));
 }
 
 
+>>>>>>> 14a2cf44c5e8a86b0edfdcc944366b2daf240392
 /*************************** MSG QUEUE ************************/
 
 /* initialize the data structure */
