@@ -1,5 +1,6 @@
-#include <stdint.h>
 #include "mikabooq.h"
+#include "const.h"
+#include <stdint.h>
 
 /* teste delle liste libere */
 struct list_head pcbFree;
@@ -11,14 +12,14 @@ struct list_head msgFree;
 /* initialize the data structure */
 /* the return value is the address of the root process */
 struct pcb_t *proc_init(void) {
-	static pcb_t pcb_table[MAXPROC]; //Array statico contenente MAXPROC pcb_t 
+	static struct pcb_t pcb_table[MAXPROC]; //Array statico contenente MAXPROC pcb_t 
 	int i;
 	INIT_LIST_HEAD(&(pcbFree)); //Inizializza la testa dell lista libera pcbFree
 	for(i=1; i<MAXPROC; i++){ //Aggiunge tutti i pcb_t (a parte il root) nella lista libera
-		pcb_t* newPcb = &pcb_table[i];
+		struct pcb_t* newPcb = &pcb_table[i];
         	list_add(&(newPcb->p_siblings), &(pcbFree)); //p_siblings usata per gestire la lista libera
 	}
-	pcb_t* root=&(pcb_table[0]); //root non è stato messo nella pcbFree
+	struct pcb_t* root=&(pcb_table[0]); //root non è stato messo nella pcbFree
 	INIT_LIST_HEAD(&(root->p_children)); //Inizializza la lista libera p_children di root
 	INIT_LIST_HEAD(&(root->p_threads)); //Inizializza la lista libera p_threads di root
 	root->p_parent=NULL; //root non ha "genitori"
@@ -33,7 +34,7 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 
 		//Lista libera non è vuota e p_parent non è nullo!		
 		//allocpcb: puntatore al primo pcb_t libero della pcbFree			
-		struct pcb_t* allocpcb = container_of(pcbFree.next, pcb_t, p_siblings);
+		struct pcb_t* allocpcb = container_of(pcbFree.next, struct pcb_t, p_siblings);
 		//Stacco l'elemento dalla lista libera
 		list_del(pcbFree.next);
 		//inizializzo i campi del pcb_t che ho allocato
@@ -50,10 +51,10 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 /* this function must fail if the process has threads or children. */
 /* return value: 0 in case of success, -1 otherwise */
 int proc_delete(struct pcb_t *oldproc){
-	if(!(list_empty(oldproc->p_children))) return -1; //oldproc ha figli attivi
-	if(!(list_empty(oldproc->p_threads))) return -1; //oldproc ha processi attivi
+	if(!(list_empty(&(oldproc->p_children)))) return -1; //oldproc ha figli attivi
+	if(!(list_empty(&(oldproc->p_threads)))) return -1; //oldproc ha processi attivi
 	//Tolgo oldproc dai figli del padre	
-	list_del(&(oldproc->p_siblings);	
+	list_del(&(oldproc->p_siblings));	
 	//rimette oldproc nella lista libera freePcb
 	list_add(&(oldproc->p_siblings),&(pcbFree)); 
 	//NB Non vengono ripuliti i campi di oldproc, in quanto verranno reinizializzati alla prima alloc.
@@ -62,26 +63,27 @@ int proc_delete(struct pcb_t *oldproc){
 
 /* return the pointer to the first child (NULL if the process has no children) */
 struct pcb_t *proc_firstchild(struct pcb_t *proc){
-	if((list_empty(proc->p_children))) return NULL; //non ha figli
-	return container_of((proc->p_children).next, pcb_t, p_sibling); //primo figlio
-	
+	if((list_empty(&(proc->p_children)))) return NULL; //non ha figli
+	struct pcb_t *firstchild = container_of((proc->p_children).next, struct pcb_t, p_siblings); //primo figlio
+	return (firstchild);
 }
 
 /* return the pointer to the first thread (NULL if the process has no threads) */
 struct tcb_t *proc_firstthread(struct pcb_t *proc){
-	if((list_empty(proc->p_threads))) return NULL; //non ha threads
-	return container_of((proc->p_threads).next, pcb_t, p_sibling); //primo thread
+	if((list_empty(&(proc->p_threads)))) return NULL; //non ha threads
+	struct tcb_t *firstthread = container_of((proc->p_threads).next, struct tcb_t, t_next); //primo thread
+	return (firstthread);
 }
 
 /****************************************** THREAD ALLOCATION ****************/
 
 /* initialize the data structure */
 void thread_init(void) {
-	static tcb_t tcb_table[MAXTHREAD]; //Array statico contenente MAXTHREAD tcb_t 
+	static struct tcb_t tcb_table[MAXTHREAD]; //Array statico contenente MAXTHREAD tcb_t 
 	int i;
 	INIT_LIST_HEAD(&(tcbFree)); //Inizializza la testa della lista libera tcbFree
-	for(i=0; i<MAXPROC; i++){ //Aggiunge tutti i tcb_t della tcb_table nella lista libera
-		tcb_t* newTcb = &tcb_table[i];
+	for(i=0; i<MAXTHREAD; i++){ //Aggiunge tutti i tcb_t della tcb_table nella lista libera
+		struct tcb_t* newTcb = &tcb_table[i];
         	list_add(&(newTcb->t_next), &(tcbFree)); //NB: t_next usata per gestire la lista libera
 	}
 }
@@ -91,11 +93,11 @@ void thread_init(void) {
 	 return 0 (success) otherwise */
 struct tcb_t *thread_alloc(struct pcb_t *process) {
 	if (list_empty(&(tcbFree))) return NULL; //non ci sono tcb_t liberi
-	if(process==NULL) return NULL; //process è nullo, non può avere threads
+	if (process==NULL) return NULL; //process è nullo, non può avere threads
 
 	//Lista libera non è vuota e process non è nullo!		
 	//allocTcb: puntatore al primo tcb_t libero della tcbFree			
-	struct tcb_t* allocTcb = container_of(tcbFree.next, tcb_t, t_next);
+	struct tcb_t* allocTcb = container_of(tcbFree.next, struct tcb_t, t_next);
 	//Stacco l'elemento dalla lista libera
 	list_del(tcbFree.next);
 	//NB: inizializzo tutti i campi, tranne	t_s
@@ -117,11 +119,11 @@ struct tcb_t *thread_alloc(struct pcb_t *process) {
 	 its process) */
 /* it fails if the message queue is not empty (returning -1) */
 int thread_free(struct tcb_t *oldthread){
-	if (!(list_empty(oldthread->t_msgq)) return -1;	
+	if (!(list_empty(&(oldthread->t_msgq)))) return -1;	
 	//Tolgo oldthread dalla lista dei thread del processo	
-	list_del(&(oldthread->next));
+	list_del(&(oldthread->t_next));
 	//Aggiungo oldthread alla lista libera dei tcb	
-	list_add(&(oldthread->next), &(tcbFree));
+	list_add(&(oldthread->t_next), &(tcbFree));
 	//NB Non vengono ripuliti i campi di oldthread, in quanto verranno reinizializzati alla prima alloc.
 	return 0;
 }
@@ -130,7 +132,7 @@ int thread_free(struct tcb_t *oldthread){
 
 /* add a tcb to the scheduling queue */
 void thread_enqueue(struct tcb_t *new, struct list_head *queue){
-	list_add(&(new->t_sched),&(queue));
+	list_add(&(new->t_sched),queue);
 }
 
 /* return the head element of a scheduling queue.
@@ -138,16 +140,16 @@ void thread_enqueue(struct tcb_t *new, struct list_head *queue){
 	 return NULL if the list is empty */
 struct tcb_t *thread_qhead(struct list_head *queue){
 	if (list_empty(queue)) return NULL;
-	return (container_of(queue.next, tcb_t, t_sched));
+	return (container_of(queue->prev, struct tcb_t, t_sched));
 }
 
 /* get the first element of a scheduling queue.
 	 return NULL if the list is empty */
-struct tcb_t *thread_dequeue(struct list_head *queue);
+struct tcb_t *thread_dequeue(struct list_head *queue){
 	if (list_empty(queue)) return NULL;
-	struct list_head *temp_t = queue.next;
-	list_del(queue.next);
-	return (container_of(temp_t, tcb_t, t_sched));
+	struct list_head *temp_t = queue->prev;
+	list_del(queue->prev);
+	return (container_of(temp_t, struct tcb_t, t_sched));
 }
 
 
@@ -156,11 +158,11 @@ struct tcb_t *thread_dequeue(struct list_head *queue);
 /* initialize the data structure */
 /* the return value is the address of the root process */
 void msgq_init(void){
-	static msg_t msg_table[MAXMSG]; //Array statico contenente MAXMSG msg_t 
+	static struct msg_t msg_table[MAXMSG]; //Array statico contenente MAXMSG msg_t 
 	int i;
 	INIT_LIST_HEAD(&(msgFree)); //Inizializza la testa della lista libera msgFree
 	for(i=0; i<MAXMSG; i++){ //Aggiunge tutti i msg_t della msg_table nella lista libera
-		msg_t* newMsg = &msg_table[i];
+		struct msg_t* newMsg = &msg_table[i];
         	list_add(&(newMsg->m_next), &(msgFree)); //NB: m_next usata per gestire la lista libera
 	}
 }
@@ -170,11 +172,11 @@ void msgq_init(void){
 int msgq_add(struct tcb_t *sender, struct tcb_t *destination, uintptr_t value){
 	if (sender==NULL) return -1; //Sender NULL
 	if (destination==NULL) return -1; //Destination NULL
-	if (list_empty(&(msgFree)) return -1; //Lista libera dei messaggi vuota
+	if (list_empty(&(msgFree))) return -1; //Lista libera dei messaggi vuota
 	
 	//Lista libera non è vuota e sender e destination non sono nulli!		
 	//allocMsg: puntatore al primo msg_t libero della msgFree			
-	struct msg_t* allocMsg = container_of(msgFree.next, msg_t, m_next);
+	struct msg_t* allocMsg = container_of(msgFree.next, struct msg_t, m_next);
 	//Stacco l'elemento dalla lista libera
 	list_del(msgFree.next);
 	//Imposto il mittente del messaggio
@@ -195,11 +197,11 @@ int msgq_add(struct tcb_t *sender, struct tcb_t *destination, uintptr_t value){
 	 return 0 and store the message payload in *value otherwise. */
 int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value){
 	if (sender==NULL){ //CASO 1: Sender NULL - No filtro mittente
-		if (list_empty(destination->t_msgq)) return -1; //Destinatario senza messaggi
+		if (list_empty(&(destination->t_msgq))) return -1; //Destinatario senza messaggi
 		//temp_m: puntatore al primo msg_t libero della t_msgq del destinatario			
-		struct msg_t *temp_m = container_of((destination->t_msgq).next, msg_t, m_next);
+		struct msg_t *temp_m = container_of((destination->t_msgq).prev, struct msg_t, m_next);
 		//Elimino temp_m dalla lista t_msgq del destinatario		
-		list_del(temp_m);
+		list_del(&(temp_m->m_next));
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		
@@ -207,15 +209,15 @@ int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value)
 		return 0;
 	}
 	if ((sender!=NULL)&&(*sender==NULL)){ //CASO 2: No filtro mittente, ma memorizzato
-		if (list_empty(destination->t_msgq)) return -1; //Destinatario senza messaggi
+		if (list_empty(&(destination->t_msgq))) return -1; //Destinatario senza messaggi
 		//temp_m: puntatore al primo msg_t libero della t_msgq del destinatario			
-		struct msg_t *temp_m = container_of((destination->t_msgq).next, msg_t, m_next);
+		struct msg_t *temp_m = container_of((destination->t_msgq).prev, struct msg_t, m_next);
 		//Elimino temp_m dalla lista t_msgq del destinatario		
-		list_del(temp_m);
+		list_del(&(temp_m->m_next));
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		
-		*value=temp_m->m_value;
+		*value= temp_m->m_value;
 		//Imposto il campo sender
 		*sender = temp_m->m_sender;		
 		return 0;
@@ -223,16 +225,16 @@ int msgq_get(struct tcb_t **sender, struct tcb_t *destination, uintptr_t *value)
 	if ((sender!=NULL)&&(*sender!=NULL)){ //CASO 3: Filtro mittente
 		struct msg_t *temp_m;		
 		struct msg_t *item;
-		bool found=0;
-		list_for_each_entry(item,&(destination->t_msgq),t_msgq) {
+		int found=0;
+		list_for_each_entry(item,&(destination->t_msgq), m_next) {
 			if ((!found)&&(item->m_sender==*sender)){
 				temp_m=item;
 				found=1;
 			}
 		}
-		if !found return -1;
+		if (!found) return -1;
 		//Elimino temp_m dalla lista t_msgq del destinatario		
-		list_del(temp_m);
+		list_del(&(temp_m->m_next));
 		//Aggiungo temp_m alla lista libera msgFree
 		list_add(&(temp_m->m_next),&(msgFree));
 		//Imposto il campo value		

@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "mikabooq.h"
 
 /* teste delle liste libere */
@@ -14,7 +13,6 @@ struct pcb_t *proc_init(void) {
 	static pcb_t pcb_table[MAXPROC]; //Array statico contenente MAXPROC pcb_t 
 	int i;
 	INIT_LIST_HEAD(&(pcbFree)); //Inizializza la testa dell lista libera pcbFree
-	//pcbFree=&(pcb_table[0]); PERCHE'?????	
 	for(i=1; i<MAXPROC; i++){ //Aggiunge tutti i pcb_t (a parte il root) nella lista libera
 		pcb_t* newPcb = &pcb_table[i];
         	list_add(&(newPcb->p_siblings), &(pcbFree)); //p_siblings usata per gestire la lista libera
@@ -22,7 +20,6 @@ struct pcb_t *proc_init(void) {
 	pcb_t* root=&(pcb_table[0]); //root non è stato messo nella pcbFree
 	INIT_LIST_HEAD(&(root->p_children)); //Inizializza la lista libera p_children di root
 	INIT_LIST_HEAD(&(root->p_threads)); //Inizializza la lista libera p_threads di root
-	/////INIT_LIST_HEAD(&(root->p_siblings)); //Inizializza la lista libera p_siblings di root
 	root->p_parent=NULL; //root non ha "genitori"
 return(root);
 }
@@ -40,21 +37,11 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 		list_del(pcbFree.next);
 		//inizializzo i campi del pcb_t che ho allocato
 		INIT_LIST_HEAD(&(allocpcb->p_children));
-		INIT_LIST_HEAD(&(allocpcb->p_threads));
-
-		/////fratelli di allocpcb = figli del padre (senza allocpcb)		
-		/////allocpcb->p_siblings=p_parent->p_children;
-		
+		INIT_LIST_HEAD(&(allocpcb->p_threads));		
 		//aggiungo l'elemento allocato ai figli del padre
 		list_add(&(allocpcb->p_siblings),&(p_parent->p_children));
+		//imposto il campo p_parent		
 		allocpcb->p_parent=p_parent;
-		
-		////aggiungo allocpcb ai suoi fratelli
-		////struct pbc_t* item; //item: elemento corrente nel ciclo
-		////list_for_each_entry(item, &(allocpcb->p_siblings), p_siblings){
-			////list_add(&(allocpcb->p_siblings),&(item->p_siblings));
-		////}
-		
 		return(allocpcb);
 }
 
@@ -64,19 +51,10 @@ struct pcb_t *proc_alloc(struct pcb_t *p_parent){
 int proc_delete(struct pcb_t *oldproc){
 	if(!(list_empty(oldproc->p_children))) return -1; //oldproc ha figli attivi
 	if(!(list_empty(oldproc->p_threads))) return -1; //oldproc ha processi attivi
-	
-	/////list_del(&(allopcb->p_sibling), &(oldproc->p_sibling)); WHY???????
-
 	//Tolgo oldproc dai figli del padre	
 	list_del(&(oldproc->p_siblings);	
-	
-	////struct pbc_t* item; //item elemento corrente nel ciclo
-	////list_for_each_entry(item, &(oldproc->p_siblings), p_siblings){
-		////list_add(&(allocpcb->p_siblings),&(item->p_siblings)) WHY???????
-		////list_del(&(oldproc->p_siblings));
-	////}
-
-	list_add(&(oldproc->p_siblings),&(pcbFree)); //rimette oldproc nella lista libera freePcb
+	//rimette oldproc nella lista libera freePcb
+	list_add(&(oldproc->p_siblings),&(pcbFree)); 
 	//NB Non vengono ripuliti i campi di oldproc, in quanto verranno reinizializzati alla prima alloc.
 	return(0);
 }
@@ -125,10 +103,10 @@ struct tcb_t *thread_alloc(struct pcb_t *process) {
 	INIT_LIST_HEAD(&(allocTcb->t_msgq));
 	//imposto il processo "padre" in p_tcb
 	allocTcb->t_pcb=process;
-	//inizializzo lo stato del thread
-	allocTcb->t_status=T_STATUS_NONE; //allocato, ma non ancora eseguito
-	//inizializzo t_wait4sender
-	allocTcb->t_wait4sender=NULL;
+	///inizializzo lo stato del thread
+	///allocTcb->t_status=T_STATUS_NONE; //allocato, ma non ancora eseguito
+	///inizializzo t_wait4sender
+	///allocTcb->t_wait4sender=NULL;
 	//aggiungo l'elemento allocato ai thread del processo "padre"
 	list_add(&(allocTcb->t_next),&(process->p_threads));
 	return(allocTcb);
@@ -159,7 +137,11 @@ void thread_enqueue(struct tcb_t *new, struct list_head *queue){
 	 return NULL if the list is empty */
 struct tcb_t *thread_qhead(struct list_head *queue){
 	if (list_empty(queue)) return NULL;
+<<<<<<< HEAD
 	return (conrainer_of(queue.next, tcb_t, t_sched));
+=======
+	return (container_of(queue.next, tcb_t, t_sched));
+>>>>>>> 14a2cf44c5e8a86b0edfdcc944366b2daf240392
 }
 
 /* get the first element of a scheduling queue.
@@ -168,9 +150,16 @@ struct tcb_t *thread_dequeue(struct list_head *queue);
 	if (list_empty(queue)) return NULL;
 	struct list_head *temp_t = queue.next;
 	list_del(queue.next);
+<<<<<<< HEAD
 	return (conrainer_of(temp_t, tcb_t, t_sched));
 }
 
+=======
+	return (container_of(temp_t, tcb_t, t_sched));
+}
+
+
+>>>>>>> 14a2cf44c5e8a86b0edfdcc944366b2daf240392
 /*************************** MSG QUEUE ************************/
 
 /* initialize the data structure */
