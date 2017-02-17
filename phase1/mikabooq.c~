@@ -19,7 +19,7 @@
 
 #include "include/mikabooq.h"
 #include "include/const.h"
-#include <stdint.h>
+#include "stdint.h"
 
 /* teste delle liste libere */
 struct list_head pcbFree;

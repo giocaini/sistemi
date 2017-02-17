@@ -1,0 +1,28 @@
+UARM_H		= include/listx.h /usr/include/uarm/libuarm.h /usr/include/uarm/uARMconst.h /usr/include/uarm/uARMtypes.h /usr/include/uarm/arch.h
+PHASE1_H 	= include/mikabooq.h
+CONST_H		= include/const.h
+OBJECTS		= mikabooq.o p1test.o
+UARM_LIBS	= /usr/include/uarm/ldscripts/elf32ltsarm.h.uarmcore.x -o mika	 /usr/include/uarm/crtso.o /usr/include/uarm/libuarm.o
+
+all: mika
+
+p1: p1test.o mikabooq.o
+	arm-none-eabi-ld -T $(UARM_LIBS)
+	elf2uarm -k mika
+
+mika: $(OBJECTS)
+	arm-none-eabi-ld -T $(UARM_LIBS) $(OBJECTS)
+	elf2uarm -k mika
+
+mikabooq.o: mikabooq.c include/mikabooq.h
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c -Wall -I "/usr/include/uarm" -o mikabooq.o mikabooq.c
+
+
+p1test.o: p1test.c $(UARM_H) $(PHASE1_H)
+	arm-none-eabi-gcc -mcpu=arm7tdmi -c -Wall -I "/usr/include/uarm" -o p1test.o p1test.c
+
+clean:
+	rm -rf *o mika
+
+cleanall:
+	rm -rf *o mika mika.core.uarm mika.stab.uarm
