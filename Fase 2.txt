@@ -1,0 +1,26 @@
+Fase 2
+
+Esecuzione parte dal main {
+	inizializzare code(readyq), scoprire quanta memoria c'è (per saperlo lo stack parte dal fondo della memoria, quindi leggendo lo stack si trova l'indirizzo dell'ultima pagina)
+	chiama proc_init, thread_init e msg_init
+	caricare vettori interrupt e trap
+	creare il primo processo con primo thread (stato)
+		interrupt disabilitati, definire stack privato, Program Counter = test
+	aggiungere thread alla ready queue
+	chiamare lo scheduler
+}
+
+Scheduler {
+	se la readyq è vuota
+		controllo terminazione e deadlock
+		attiva lo stato di wait (a interrupt disabilitati)
+	altrimenti
+		running = thread_dequeue (reeadyq)
+	LSDT (running -> state)
+}
+
+syscall handler {
+	copy old state il thread control block
+	switch (syscall_no)
+	... send / receive
+}
