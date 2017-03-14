@@ -1,7 +1,9 @@
 Fase 2
 
+La memoria viene vista in modalit√† diretta (indirizzi logici e fisici coincidono)
+
 Esecuzione parte dal main {
-	inizializzare code(readyq), scoprire quanta memoria c'Ë (per saperlo lo stack parte dal fondo della memoria, quindi leggendo lo stack si trova l'indirizzo dell'ultima pagina)
+	inizializzare code(readyq), scoprire quanta memoria c'√® (per saperlo lo stack parte dal fondo della memoria, quindi leggendo lo stack si trova l'indirizzo dell'ultima pagina)
 	chiama proc_init, thread_init e msg_init
 	caricare vettori interrupt e trap
 	creare il primo processo con primo thread (stato)
@@ -11,7 +13,7 @@ Esecuzione parte dal main {
 }
 
 Scheduler {
-	se la readyq Ë vuota
+	se la readyq √® vuota
 		controllo terminazione e deadlock
 		attiva lo stato di wait (a interrupt disabilitati)
 	altrimenti
