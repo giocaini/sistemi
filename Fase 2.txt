@@ -26,3 +26,5 @@ syscall handler {
 	switch (syscall_no)
 	... send / receive
 }
+
+Fare routine di pass-up
