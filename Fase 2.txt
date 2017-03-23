@@ -28,3 +28,5 @@ syscall handler {
 }
 
 Fare routine di pass-up
+
+readyq unica
