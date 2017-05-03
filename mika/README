@@ -1,0 +1,74 @@
+*****************************************************************************
+* Copyright 2017 Giovanni Caini, Ossama Gana, Luca Morosini                 *
+*                                                                           *
+* This file is part of MiKABoO.                                             *
+*                                                                           *
+* MiKABoO is free software; you can redistribute it and/or modify it under  *
+* the terms of the GNU General Public License as published by the Free      *
+* Software Foundation; either version 2 of the License, or (at your option) *
+* any later version.                                                        *
+* This program is distributed in the hope that it will be useful, but       *
+* WITHOUT ANY WARRANTY; without even the implied warranty of                *
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General *
+* Public License for more details.                                          *
+* You should have received a copy of the GNU General Public License along   *
+* with this program; if not, write to the Free Software Foundation, Inc.,   *
+* 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.                  *
+*****************************************************************************
+
+
+*****************************************************************************
+ISTRUZIONI PER LA COMPILAZIONE
+*****************************************************************************
+
+NB Se la macchina è a 64 bit, potrebbe essere necessario installare la libreria libc dev 32 bit, ovvero eseguire tramite terminale il comando:
+sudo apt-get install libc6-dev-i386.
+
+1) COMPILAZIONE E GENERAZIONE DEI FILE ESEGUIBILI DA UARM
+Per compilare e generare i files del progetto eseguibili da uARM, spostarsi nella cartella di installazione del progetto (mika) ed eseguire il comando:
+make
+
+Verranno così generate due cartelle:
+- lib (contenete gli objects files)
+- kernel (contenente i files del core e della symble table, eseguibili da uARM).
+
+
+2) ESECUZIONE E IMPOSTAZIONE DI uARM
+Da riga di comando, eseguire il comando uarm per aprire la macchina emulata uARM.
+
+In alto a sinistra, cliccare sul pulsante "Machine Configs" e:
+- In "Core file" sfogliare e selezionare il file mika.core.uarm
+- In "Symbol table" sfogliare e selezionare il file mika.stab.uarm
+Entrambi i files sono quelli creati con il make e si troveranno nella cartella kernel creata al punto 1.
+
+Configurate tali opzioni, sarà possibile eseguire su uARM il progetto, cliccando su "Power On", quindi su "Play".
+
+
+3) RIMOZIONE DEI FILES COMPILATI (per eventuale ricompilazione)
+Da riga di comando, spostarsi nella cartella principale del progetto (mika) e eseguire il comando:
+make clean
+
+Le directory lib e kernel (create al punto 1) verranno così eliminate e si potrà procedere ad una nuova compilazione con il comando make.
+
+
+
+*****************************************************************************
+DOCUMENTAZIONE DELLA PHASE1 DEL PROGETTO
+*****************************************************************************
+
+La documentazione completa della phase1 di questo progetto si può trovare al link
+
+http://www.cs.unibo.it/~renzo/so/mikaboo/phase1.pdf
+
+
+
+*****************************************************************************
+ULTERIORI INFORMAZIONI SULLA MACCHINA EMULATA uARM
+*****************************************************************************
+
+Per ottenere maggiori informazioni sul funzionamento di uARM (e sulla sua eventuale installazione), si possono consultare:
+- Il repository github di uARM: http://mellotanica.github.io/uARM/
+- La tesi magistrale di Marco Melletti: http://amslaurea.unibo.it/id/eprint/11866
+
+
+
